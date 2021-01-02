@@ -10,7 +10,7 @@ import (
 func TestReplacerReplace(t *testing.T) {
 	t.Run("jaPage1", func(t *testing.T) {
 		input := bytes.NewBufferString(jaPage1(imgTag(1), mdImg(3)))
-		rep := NewReplacer()
+		rep := NewReplacer(TestAssetBaseURL)
 		rr, err := rep.Replace(input, "日本語ページ1")
 
 		path1 := "日本語ページ1/0001.png"

@@ -11,11 +11,12 @@ import (
 )
 
 type Replacer struct {
-	fileNo int
+	Scanner *Scanner
+	fileNo  int
 }
 
-func NewReplacer() *Replacer {
-	return &Replacer{}
+func NewReplacer(assetUrlBase string) *Replacer {
+	return &Replacer{Scanner: NewScanner(assetUrlBase)}
 }
 
 func (rep *Replacer) Do(filepath string) error {
@@ -59,7 +60,7 @@ func (rep *Replacer) Replace(input io.Reader, baseDir string) (*ReplaceResult, e
 	sc := bufio.NewScanner(input)
 	for sc.Scan() {
 		line := sc.Text()
-		mrs := Scan(line)
+		mrs := rep.Scanner.Do(line)
 		for _, mr := range mrs {
 			rep.fileNo++
 			dest := fmt.Sprintf("%s/%04d%s", baseDir, rep.fileNo, path.Ext(mr.Result))

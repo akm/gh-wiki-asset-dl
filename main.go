@@ -13,7 +13,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "target-url",
-				Usage:    "user-images.githubusercontent.com",
+				Usage:    "https://user-images.githubusercontent.com",
 				Required: true,
 			},
 		},
@@ -47,7 +47,7 @@ func execute(ctx *cli.Context) error {
 	}
 
 	ff := NewFilter([]string{".md"})
-	rep := NewReplacer()
+	rep := NewReplacer(ctx.String("target-url"))
 
 	for _, path := range paths.Slice() {
 		if err := ff.Glob(path, rep.Do); err != nil {
