@@ -12,15 +12,13 @@ func main() {
 	app := &cli.App{
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:     "target-url",
-				Value:    "https://user-images.githubusercontent.com",
-				Required: true,
+				Name:  "target-url",
+				Value: "https://user-images.githubusercontent.com",
 			},
 			&cli.IntFlag{
-				Name:     "download-buffer-size",
-				Aliases:  []string{"b"},
-				Value:    1024 * 1024,
-				Required: true,
+				Name:    "download-buffer-size",
+				Aliases: []string{"b"},
+				Value:   1024 * 1024,
 			},
 		},
 		Commands: []*cli.Command{
