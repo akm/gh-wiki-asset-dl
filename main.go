@@ -13,7 +13,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "target-url",
-				Usage:    "asset.github.com", // ?
+				Usage:    "user-images.githubusercontent.com",
 				Required: true,
 			},
 		},
