@@ -15,8 +15,8 @@ type Replacer struct {
 	fileNo  int
 }
 
-func NewReplacer(assetUrlBase string) *Replacer {
-	return &Replacer{Scanner: NewScanner(assetUrlBase)}
+func NewReplacer(scanner *Scanner) *Replacer {
+	return &Replacer{Scanner: scanner}
 }
 
 func (rep *Replacer) Do(filepath string) error {
