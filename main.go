@@ -13,7 +13,13 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "target-url",
-				Usage:    "https://user-images.githubusercontent.com",
+				Value:    "https://user-images.githubusercontent.com",
+				Required: true,
+			},
+			&cli.IntFlag{
+				Name:     "download-buffer-size",
+				Aliases:  []string{"b"},
+				Value:    1024 * 1024,
 				Required: true,
 			},
 		},
@@ -49,6 +55,7 @@ func execute(ctx *cli.Context) error {
 	ff := NewFilter([]string{".md"})
 	rep := NewReplacer(
 		NewScanner(ctx.String("target-url")),
+		NewDownloader(ctx.Int("download-buffer-size")),
 	)
 
 	for _, path := range paths.Slice() {

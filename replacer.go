@@ -11,12 +11,13 @@ import (
 )
 
 type Replacer struct {
-	Scanner *Scanner
-	fileNo  int
+	Scanner    *Scanner
+	Downloader *Downloader
+	fileNo     int
 }
 
-func NewReplacer(scanner *Scanner) *Replacer {
-	return &Replacer{Scanner: scanner}
+func NewReplacer(scanner *Scanner, downloader *Downloader) *Replacer {
+	return &Replacer{Scanner: scanner, Downloader: downloader}
 }
 
 func (rep *Replacer) Do(filepath string) error {
@@ -37,14 +38,13 @@ func (rep *Replacer) Do(filepath string) error {
 		return err
 	}
 
-	fmt.Printf("%v", rr)
+	for _, dl := range rr.downloads {
+		if err := rep.Downloader.Execute(dl); err != nil {
+			return err
+		}
+	}
 
 	return nil
-}
-
-type Download struct {
-	Url  string
-	Path string
 }
 
 type ReplaceResult struct {
@@ -76,24 +76,3 @@ func (rep *Replacer) Replace(input io.Reader, baseDir string) (*ReplaceResult, e
 
 	return &ReplaceResult{output: output, downloads: downloads}, nil
 }
-
-// func (rep *Replacer) makeText(filepath string) (*bytes.Buffer, error) {
-// 	var r bytes.Buffer
-
-// 	f, err := os.Open(filepath)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	defer f.Close()
-
-// 	sc := bufio.NewScanner(f)
-// 	for sc.Scan() {
-// 		matches := sc.Text()
-
-// 	}
-// 	if err := sc.Err(); err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &r, nil
-// }
