@@ -8,8 +8,6 @@ import (
 	"github.com/akm/gh-wiki-asset-dl/primitives"
 )
 
-const assetUrlBase = "https://user-images.githubusercontent.com/"
-
 var assetExts = primitives.Strings{
 	".gif", ".jpeg", ".jpg", ".mov", ".mp4", ".png",
 	".docx", ".gz", ".log", ".pdf", ".pptx", ".txt",
@@ -39,17 +37,6 @@ type Pattern struct {
 	Regexp *regexp.Regexp
 }
 
-var patterns = func() []*Pattern {
-	escapedBase := regexp.QuoteMeta(assetUrlBase)
-	escapedExts := assetExts.Map(regexp.QuoteMeta).Join(`|`)
-	imgSrcReStr := `"(` + escapedBase + `[^\"]*(?:` + escapedExts + `))"`
-	mdImgReStr := `\((` + escapedBase + `[^\)]*(?:` + escapedExts + `))\)`
-	return []*Pattern{
-		{Type: ImgSrc, Regexp: regexp.MustCompile(imgSrcReStr)},
-		{Type: MdImg, Regexp: regexp.MustCompile(mdImgReStr)},
-	}
-}()
-
 type MatchResult struct {
 	Type   PatternType
 	Result string
@@ -59,10 +46,30 @@ func (mr *MatchResult) Replace(line string, replaced string) string {
 	return strings.ReplaceAll(line, mr.Type.Quote(mr.Result), mr.Type.Quote(replaced))
 }
 
-func Scan(s string) []*MatchResult {
+type Scanner struct {
+	assetUrlBase string
+}
+
+func NewScanner(assetUrlBase string) *Scanner {
+	return &Scanner{assetUrlBase: assetUrlBase}
+}
+
+func (s *Scanner) buildPatterns() []*Pattern {
+	escapedBase := regexp.QuoteMeta(s.assetUrlBase)
+	escapedExts := assetExts.Map(regexp.QuoteMeta).Join(`|`)
+	imgSrcReStr := `"(` + escapedBase + `[^\"]*(?:` + escapedExts + `))"`
+	mdImgReStr := `\((` + escapedBase + `[^\)]*(?:` + escapedExts + `))\)`
+	return []*Pattern{
+		{Type: ImgSrc, Regexp: regexp.MustCompile(imgSrcReStr)},
+		{Type: MdImg, Regexp: regexp.MustCompile(mdImgReStr)},
+	}
+}
+
+func (s *Scanner) Do(str string) []*MatchResult {
 	r := []*MatchResult{}
+	patterns := s.buildPatterns()
 	for _, ptn := range patterns {
-		for _, m := range ptn.Regexp.FindAllStringSubmatch(s, -1) {
+		for _, m := range ptn.Regexp.FindAllStringSubmatch(str, -1) {
 			r = append(r, &MatchResult{
 				Type:   ptn.Type,
 				Result: m[1],

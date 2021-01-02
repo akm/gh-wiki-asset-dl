@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+const TestAssetBaseURL = "https://user-images.githubusercontent.com"
+
 func imgUrl(num int) string {
 	return "https://user-images.githubusercontent.com/18912/103336550-e2d6cd80-4abb-11eb-9412-%d08d.png"
 }
