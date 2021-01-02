@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path"
 )
 
 type Download struct {
@@ -28,6 +29,11 @@ func (x *Downloader) Execute(dl *Download) error {
 	}
 	if resp.StatusCode < 100 || resp.StatusCode >= 300 {
 		return fmt.Errorf("Failed to download %s because of %s", dl.Url, resp.Status)
+	}
+
+	dirPath := path.Dir(dl.Path)
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		return err
 	}
 
 	f, err := os.OpenFile(dl.Path, os.O_RDWR|os.O_CREATE, 0644)
