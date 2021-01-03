@@ -21,19 +21,7 @@ func NewReplacer(scanner *Scanner, downloader *Downloader) *Replacer {
 }
 
 func (rep *Replacer) Do(filepath string) error {
-	f, err := os.Open(filepath)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	re, err := regexp.Compile(regexp.QuoteMeta(path.Ext(filepath)) + `\z`)
-	if err != nil {
-		return err
-	}
-	dest := re.ReplaceAllString(filepath, "")
-
-	rr, err := rep.Replace(f, dest)
+	rr, err := rep.LoadAndReplace(filepath)
 	if err != nil {
 		return err
 	}
@@ -44,12 +32,42 @@ func (rep *Replacer) Do(filepath string) error {
 		}
 	}
 
+	f, err := os.OpenFile(filepath, os.O_TRUNC|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to close file %s because of %v\n", filepath, err)
+		}
+	}()
+
+	if _, err := f.Write(rr.output.Bytes()); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 type ReplaceResult struct {
 	output    *bytes.Buffer
 	downloads []*Download
+}
+
+func (rep *Replacer) LoadAndReplace(filepath string) (*ReplaceResult, error) {
+	f, err := os.Open(filepath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	re, err := regexp.Compile(regexp.QuoteMeta(path.Ext(filepath)) + `\z`)
+	if err != nil {
+		return nil, err
+	}
+	dest := re.ReplaceAllString(filepath, "")
+
+	return rep.Replace(f, dest)
 }
 
 func (rep *Replacer) Replace(input io.Reader, baseDir string) (*ReplaceResult, error) {
